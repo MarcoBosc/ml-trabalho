@@ -75,17 +75,9 @@
 <script>
 const form = document.getElementById("uploadForm");
 const statusDiv = document.getElementById("status");
+const PRODUCER_URL = "http://127.0.0.1:8000/upload";
 
-// Detecta automaticamente se está dentro do cluster ou não
-let PRODUCER_URL;
-if (window.location.hostname.endsWith(".svc.cluster.local")) {
-    // Rodando dentro do cluster
-    PRODUCER_URL = "http://producer-service.meme-generator.svc.cluster.local:8000/upload";
-} else {
-    // Rodando fora do cluster (localhost)
-    // Substitua 32523 pelo NodePort atual do seu producer
-    PRODUCER_URL = "http://127.0.0.1:32523/upload";
-}
+
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
