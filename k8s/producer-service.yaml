@@ -4,9 +4,9 @@ metadata:
   name: producer-service
   namespace: meme-generator
 spec:
+  type: NodePort
   selector:
     app: producer
   ports:
     - port: 8000
       targetPort: 8000
-  type: ClusterIP

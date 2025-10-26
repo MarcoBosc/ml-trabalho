@@ -77,7 +77,7 @@ const form = document.getElementById("uploadForm");
 const statusDiv = document.getElementById("status");
 
 // Endpoint do producer dentro do cluster
-const PRODUCER_URL = "http://producer-service.meme-generator.svc.cluster.local:8000/upload";
+const PRODUCER_URL = "http://127.0.0.1:53232/upload";
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
