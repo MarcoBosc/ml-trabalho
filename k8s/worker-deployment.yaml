@@ -14,12 +14,16 @@ spec:
         app: worker
     spec:
       containers:
-      - name: worker
-        image: image_worker:local
-        volumeMounts:
-        - name: meme-storage
-          mountPath: /data/output
+        - name: worker
+          image: image_worker:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+          volumeMounts:
+            - name: meme-storage
+              mountPath: /data/output
       volumes:
-      - name: meme-storage
-        persistentVolumeClaim:
-          claimName: meme-storage
+        - name: meme-storage
+          persistentVolumeClaim:
+            claimName: meme-storage
