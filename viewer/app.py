@@ -22,12 +22,24 @@ HTML_TEMPLATE = """
 <body>
 <h1>Último Meme Gerado 😎</h1>
 {% if image %}
-  <img src="/latest"><br>
-  <a href="/download">Baixar Meme</a>
-  <p>Meme gerado com sucesso! Clique em "Baixar Meme" ou atualize para ver novos memes.</p>
+  <img id="latest-meme" src="/latest?{{ timestamp }}" alt="Meme"><br>
+  <a href="/download" id="download-link">Baixar Meme</a>
+  <p>Meme gerado com sucesso! O viewer atualiza automaticamente.</p>
 {% else %}
   <p>Nenhuma imagem gerada ainda. Envie uma no frontend.</p>
 {% endif %}
+
+<script>
+function refreshMeme() {
+    const img = document.getElementById("latest-meme");
+    if (!img) return;
+    // Adiciona timestamp para forçar cache-busting
+    img.src = "/latest?" + new Date().getTime();
+}
+
+// Atualiza a cada 5 segundos
+setInterval(refreshMeme, 5000);
+</script>
 </body>
 </html>
 """
@@ -41,7 +53,8 @@ def get_latest_meme():
 @app.route("/")
 def index():
     latest = get_latest_meme()
-    return render_template_string(HTML_TEMPLATE, image=latest)
+    timestamp = int(os.path.getmtime(latest)) if latest else 0
+    return render_template_string(HTML_TEMPLATE, image=latest, timestamp=timestamp)
 
 @app.route("/latest")
 def latest():
