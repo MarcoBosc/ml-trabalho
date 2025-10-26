@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, Form
 import redis
 import json
 import base64
+from fastapi.middleware.cors import CORSMiddleware
+
 
 REDIS_HOST = "redis"
 REDIS_PORT = 6379
@@ -9,6 +11,13 @@ QUEUE_NAME = "meme_queue"
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/upload")
 async def upload(file: UploadFile, text: str = Form(...)):

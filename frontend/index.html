@@ -76,51 +76,60 @@
 const form = document.getElementById("uploadForm");
 const statusDiv = document.getElementById("status");
 
-// Endpoint do producer dentro do cluster
-const PRODUCER_URL = "http://127.0.0.1:53232/upload";
+// Detecta automaticamente se está dentro do cluster ou não
+let PRODUCER_URL;
+if (window.location.hostname.endsWith(".svc.cluster.local")) {
+    // Rodando dentro do cluster
+    PRODUCER_URL = "http://producer-service.meme-generator.svc.cluster.local:8000/upload";
+} else {
+    // Rodando fora do cluster (localhost)
+    // Substitua 32523 pelo NodePort atual do seu producer
+    PRODUCER_URL = "http://127.0.0.1:32523/upload";
+}
 
 form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const fileInput = document.getElementById("file");
-  const textInput = document.getElementById("text");
+    const fileInput = document.getElementById("file");
+    const textInput = document.getElementById("text");
 
-  if (!fileInput.files.length) {
-    statusDiv.textContent = "⚠️ Por favor, selecione uma imagem!";
-    statusDiv.style.color = "red";
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", fileInput.files[0]);
-  formData.append("text", textInput.value);
-
-  statusDiv.textContent = "⏳ Enviando meme...";
-  statusDiv.style.color = "#0066cc";
-
-  try {
-    const response = await fetch(PRODUCER_URL, {
-      method: "POST",
-      body: formData
-    });
-
-    if (response.ok) {
-      statusDiv.textContent = "✅ Meme enviado com sucesso! Verifique o viewer acima.";
-      statusDiv.style.color = "green";
-      fileInput.value = "";
-      textInput.value = "";
-    } else {
-      const errorText = await response.text();
-      statusDiv.textContent = `❌ Erro ao enviar meme: ${errorText}`;
-      statusDiv.style.color = "red";
+    if (!fileInput.files.length) {
+        statusDiv.textContent = "⚠️ Por favor, selecione uma imagem!";
+        statusDiv.style.color = "red";
+        return;
     }
-  } catch (err) {
-    statusDiv.textContent = "❌ Erro ao conectar com o servidor.";
-    statusDiv.style.color = "red";
-    console.error(err);
-  }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    formData.append("text", textInput.value);
+
+    statusDiv.textContent = "⏳ Enviando meme...";
+    statusDiv.style.color = "#0066cc";
+
+    try {
+        const response = await fetch(PRODUCER_URL, {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            statusDiv.textContent = "✅ Meme enviado com sucesso! Verifique o viewer acima.";
+            statusDiv.style.color = "green";
+            fileInput.value = "";
+            textInput.value = "";
+        } else {
+            const errorText = await response.text();
+            statusDiv.textContent = `❌ Erro ao enviar meme: ${errorText}`;
+            statusDiv.style.color = "red";
+        }
+    } catch (err) {
+        statusDiv.textContent = "❌ Erro ao conectar com o servidor.";
+        statusDiv.style.color = "red";
+        console.error(err);
+    }
 });
 </script>
+
 
 </body>
 </html>
