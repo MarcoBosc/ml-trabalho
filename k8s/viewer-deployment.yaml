@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: viewer-deployment
+  namespace: meme-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: viewer
+  template:
+    metadata:
+      labels:
+        app: viewer
+    spec:
+      containers:
+      - name: viewer
+        image: image_viewer:local
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: meme-storage
+          mountPath: /data/output
+      volumes:
+      - name: meme-storage
+        persistentVolumeClaim:
+          claimName: meme-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: viewer-service
+  namespace: meme-generator
+spec:
+  selector:
+    app: viewer
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: NodePort

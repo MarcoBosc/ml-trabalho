@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Gerador de Memes 😎</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #f0f2f5, #d9e2ec);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 50px 20px;
+  }
+  h1 {
+    color: #333;
+    margin-bottom: 30px;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+  }
+  input[type="file"], input[type="text"], button {
+    margin: 10px 0;
+    padding: 12px;
+    width: 100%;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  button {
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #45a049;
+  }
+  #status {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  #viewer-info {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<h1>Gerador de Memes 😎</h1>
+
+<form id="uploadForm">
+  <input type="file" id="file" name="file" accept="image/*" required>
+  <input type="text" id="text" name="text" placeholder="Digite a frase" required>
+  <button type="submit">Enviar Meme</button>
+</form>
+
+<div id="status">Aguardando envio...</div>
+<div id="viewer-info">Após o envio, verifique o viewer em <a href="/viewer" target="_blank">/viewer</a></div>
+
+<script>
+    const form = document.getElementById("uploadForm");
+    const statusDiv = document.getElementById("status");
+
+    // Endpoint do producer dentro do cluster
+    const PRODUCER_URL = "http://producer-service.meme-generator.svc.cluster.local:8000/upload";
+
+    form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const fileInput = document.getElementById("file");
+    const textInput = document.getElementById("text");
+
+    if (!fileInput.files.length) {
+        statusDiv.textContent = "⚠️ Por favor, selecione uma imagem!";
+        statusDiv.style.color = "red";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    formData.append("text", textInput.value);
+
+    statusDiv.textContent = "⏳ Enviando meme...";
+    statusDiv.style.color = "#0066cc";
+
+    try {
+        const response = await fetch(PRODUCER_URL, {
+        method: "POST",
+        body: formData
+        });
+
+        if (response.ok) {
+        statusDiv.textContent = "✅ Meme enviado com sucesso! Verifique o viewer acima.";
+        statusDiv.style.color = "green";
+        fileInput.value = "";
+        textInput.value = "";
+        } else {
+        const errorText = await response.text();
+        statusDiv.textContent = `❌ Erro ao enviar meme: ${errorText}`;
+        statusDiv.style.color = "red";
+        }
+    } catch (err) {
+        statusDiv.textContent = "❌ Erro ao conectar com o servidor.";
+        statusDiv.style.color = "red";
+        console.error(err);
+    }
+    });
+    </script>    
+
+</body>
+</html>
